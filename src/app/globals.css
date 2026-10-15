@@ -1,26 +1,54 @@
+
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: var(--neutral-950);
+  --foreground: var(--neutral-100);
+
+  --primary: #3b82f6;
+  --secondary: #8b5cf6;
+  --tertiary: #10b981;
+
+  --neutral-950: #0B0E19;
+  --neutral-900: #151a24;
+  --neutral-800: #1f242f;
+  --neutral-700: #2c323f;
+  --neutral-600: #4b5262;
+  --neutral-500: #6b7280;
+  --neutral-400: #9ca3af;
+  --neutral-300: #c4c8d4;
+  --neutral-200: #e0e3ea;
+  --neutral-100: #f1f3f7;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-tertiary: var(--tertiary);
+
+  --font-sans: var(--font-space-grotesk);
+  --font-mono: var(--font-geist-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), sans-serif;
 }
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-space-grotesk), sans-serif;
+}
+
+
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-purple-300 to-cyan-200 bg-clip-text text-transparent;
+  }
+}
+
+
