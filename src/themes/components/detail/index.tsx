@@ -18,18 +18,23 @@ export default async function Detail({ id }: { id: string }) {
         notFound();
     }
 
-    const description =
-        species.flavor_text_entries.find(
-            (entry: { language: { name: string } }) =>
-                entry.language.name === "en"
-        )?.flavor_text.replace(/[\n\f]/g, " ") ??
-        "No description available.";
+    const englishDescription = species.flavor_text_entries.find(
+        (item: { language: { name: string }; flavor_text: string }) =>
+            item.language.name === "en"
+    );
 
-    const summary =
-        species.genera.find(
-            (item: { language: { name: string } }) =>
-                item.language.name === "en"
-        )?.genus ?? "Unknown species";
+    const description = englishDescription
+        ? englishDescription.flavor_text
+        : "No description available.";
+
+    // const englishSummary = species.genera.find(
+    //     (item) => item.language.name === "en"
+    // );
+
+    // const summary = englishSummary
+    //     ? englishSummary.genus
+    //     : "Unknown species";
+
 
 
     const height = pokemon.height / 10; // meters
@@ -80,7 +85,7 @@ export default async function Detail({ id }: { id: string }) {
 
 
 
-                <div className="flex flex-col items-center justify-around bg-slate-800/80 rounded-xl my-5  gap-6 md:flex-row">
+                <div className="flex flex-col items-center justify-around bg-slate-800/80 rounded-xl my-5  px-3 p-1 gap-6 md:flex-row">
                     <div>
                         <h1 className="text-3xl font-bold capitalize">
                             {pokemon.name} #{pokemon.id}
@@ -100,7 +105,7 @@ export default async function Detail({ id }: { id: string }) {
                             )}
                         </div>
 
-                        <p className="mb-2 text-lg font-semibold">{summary}</p>
+                        {/* <p className="mb-2 text-lg font-semibold">{summary}</p> */}
 
                         <p className="max-w-xl leading-7 text-slate-300">
                             {description}
@@ -303,7 +308,7 @@ export default async function Detail({ id }: { id: string }) {
                     </h2>
 
                     <div className="grid gap-4 md:grid-cols-4">
-                        {pokemon.moves.slice(0, 8).map((item:any) => (
+                        {pokemon.moves.slice(0, 8).map((item: any) => (
                             <div
                                 key={item.move.name}
                                 className="rounded-xl bg-slate-700/40 p-4"
@@ -319,7 +324,7 @@ export default async function Detail({ id }: { id: string }) {
                                 <p className="mt-2 text-sm text-slate-400">
                                     This Pokémon can learn this move.
                                 </p>
-                            
+
                             </div>
                         ))}
                     </div>

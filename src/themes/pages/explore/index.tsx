@@ -51,8 +51,6 @@ export default function Explore() {
     const [pokemonIndex, setPokemonIndex] = useState<
         { id: number; name: string }[]
     >([]);
-    const [typeCounts, setTypeCounts] = useState<Record<string, number>>({});
-    const [favorite, setFavorite] = useState()
     const [offset, setOffset] = useState(0);
     const [loadingMore, setLoadingMore] = useState(false);
 
