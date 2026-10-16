@@ -5,7 +5,10 @@ export type PokemonListItem = {
 
 export async function getPokemon(id: string | number) {
     const response = await fetch(
-        `https://pokeapi.co/api/v2/pokemon/${id}`
+        `https://pokeapi.co/api/v2/pokemon/${id}`,
+        {
+            next: { revalidate: 3600 },
+        }
     );
 
     if (!response.ok) {
@@ -52,4 +55,19 @@ export async function getPokemonIndex() {
         name: item.name,
         id: Number(item.url.split("/").filter(Boolean).pop()),
     }));
+}
+
+
+
+export async function getPokemonSpecies(id: string | number) {
+  const response = await fetch(
+    `https://pokeapi.co/api/v2/pokemon-species/${id}`,
+    { next: { revalidate: 3600 } }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch Pokemon species");
+  }
+
+  return response.json();
 }

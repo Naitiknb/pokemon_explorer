@@ -4,19 +4,19 @@ import { User } from "lucide-react"
 
 export default function navbar() {
 
-    const items = [
-        {
-            key: "explore",
-            item: "Explore",
-            href: "/"
-        },
-        {
-            key:"favroites",
-            item:"favroites",
-            href:""
-        }
+    // const items = [
+    //     {
+    //         key: "explore",
+    //         item: "Explore",
+    //         href: "/"
+    //     },
+    //     {
+    //         key:"favroites",
+    //         item:"favroites",
+    //         href:""
+    //     }
 
-    ]
+    // ]
     return (
         <div className="flex items-center justify-between bg-slate-950 p-3 border-t border-white/10  shadow">
 
@@ -28,11 +28,11 @@ export default function navbar() {
                 </span>
             </div>
 
-            <div className="flex  gap-3 ">
-                {items.map((item) => {
+            {/* <div className="flex  gap-3 ">
+                {items?.map((item) => {
                     return <div className="rounded-full bg-primary text-black flex  p-1  text-xs px-3 cursor-pointer" key={item.key}>{item.key.toUpperCase()}</div>
                 })}
-            </div>
+            </div> */}
 
 
 
