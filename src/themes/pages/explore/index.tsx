@@ -1,19 +1,42 @@
 "use client"
-import { Search } from "lucide-react";
+import { getPokemon, getPokemonIndex, getPokemonList } from "@/lib/pokemon";
+import { pokemonColors } from "@/lib/pokemonColors";
+import PokemonCard from "@/themes/components/cards";
+import { ChevronDown, Search, SlidersHorizontal } from "lucide-react";
 import { useEffect, useState } from "react";
+import PokemonLoader from "@/app/loading"
 
 
-type Pokemon = {
+interface Pokemon {
+    id: number;
     name: string;
-    url: string;
+    sprites: {
+        other: {
+            "official-artwork": {
+                front_default: string | null;
+            };
+        };
+    };
+    types: {
+        type: {
+            name: string;
+        };
+    }[];
+    abilities: {
+        ability: {
+            name: string;
+        };
+        is_hidden: boolean;
+    }[];
+    stats: {
+        base_stat: number;
+        stat: {
+            name: string;
+        };
+    }[];
 };
 
 
-
-type PokemonResponse = {
-    count: number;
-    results: Pokemon[];
-};
 
 
 
@@ -21,27 +44,131 @@ export default function Explore() {
 
 
     const [count, totalCount] = useState(0)
+    const [pokemonList, setPokemonList] = useState<Pokemon[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [filter, setFilter] = useState("All");
+    const [search, setSearch] = useState("")
+    const [pokemonIndex, setPokemonIndex] = useState<
+        { id: number; name: string }[]
+    >([]);
+    const [typeCounts, setTypeCounts] = useState<Record<string, number>>({});
+    const [favorite, setFavorite] = useState()
+    const [offset, setOffset] = useState(0);
+    const [loadingMore, setLoadingMore] = useState(false);
+
+
 
 
     useEffect(() => {
         async function fetchData() {
-            const response = await fetch(
-                "https://pokeapi.co/api/v2/pokemon"
-            );
-
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error("Failed to fetch Pokémon");
+            try {
+                const [pokemon, index] = await Promise.all([
+                    getPokemonList(24),
+                    getPokemonIndex(),
+                ]);
+                setPokemonList(pokemon);
+                setPokemonIndex(index)
+                totalCount(index.length);
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setLoading(false);
             }
-
-
-            totalCount(data.count)
-
-            console.log(data);
         }
 
         fetchData();
     }, []);
+
+
+
+    useEffect(() => {
+        async function searchPokemon() {
+            const searchValue = search.trim().toLowerCase();
+
+            if (!searchValue) return;
+
+            const matches = pokemonIndex.filter(
+                (pokemon) =>
+                    pokemon.name.includes(searchValue) ||
+                    pokemon.id.toString() === searchValue.replace("#", "")
+            );
+
+            const newPokemon = await Promise.all(
+                matches.slice(0, 24).map((pokemon) => getPokemon(pokemon.id))
+            );
+
+            setPokemonList((current) => {
+                const combined = [...current, ...newPokemon];
+
+                return combined.filter(
+                    (pokemon, index, self) =>
+                        index === self.findIndex((item) => item.id === pokemon.id)
+                );
+            });
+        }
+
+        searchPokemon().catch(console.error);
+    }, [search, pokemonIndex]);
+
+
+    async function handleViewMore() {
+        setLoadingMore(true);
+
+        try {
+            const response = await fetch(
+                `https://pokeapi.co/api/v2/pokemon?limit=24&offset=${offset + 24}`
+            );
+
+            const data = await response.json();
+
+            const newPokemon = await Promise.all(
+                data.results.map((pokemon: { name: string }) =>
+                    getPokemon(pokemon.name)
+                )
+            );
+
+            setPokemonList((prev) => [...prev, ...newPokemon]);
+            setOffset((prev) => prev + 24);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoadingMore(false);
+        }
+    }
+
+
+
+
+
+
+    const filterPokemon = pokemonList.filter((pokemon) => {
+        const matchesType =
+            filter.toLowerCase() === "all" ||
+            pokemon.types.some(
+                (item) => item.type.name === filter.toLowerCase()
+            );
+
+
+
+        const matchesSearch =
+            pokemon.name.toLowerCase().includes(search.toLowerCase()) ||
+            pokemon.id.toString().includes(search.replace("#", "").trim());
+
+        return matchesType && matchesSearch;
+    });
+
+
+
+
+
+
+    const types = [
+        { name: "All", color: "bg-white" },
+        ...Object.entries(pokemonColors).map(([name, color]) => ({
+            name,
+            color,
+        })),
+    ];
 
 
 
@@ -50,15 +177,17 @@ export default function Explore() {
 
         <div>
 
-
+            {/* banner */}
             <div className="mx-auto my-10">
 
 
-                <div className="inline-flex items-center rounded-full border border-neutral-800 bg-[#191C28] p-2">
-                    <p className="flex items-center gap-2 rounded-full bg-neutral-800 px-3 py-1.5 text-xs font-medium text-neutral-300">
-                        <span className="h-2 w-2 shrink-0 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
-                        <span>{count} Pokémon Indexed</span>
-                    </p>
+                <div className="mx-auto my-10 flex justify-center">
+                    <div className="inline-flex items-center rounded-full border border-neutral-800 bg-[#191C28] p-2">
+                        <p className="flex items-center gap-2 rounded-full bg-neutral-800 px-3 py-1.5 text-xs font-medium text-neutral-300">
+                            <span className="h-2 w-2 shrink-0 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
+                            <span>{count} Pokémon Indexed</span>
+                        </p>
+                    </div>
                 </div>
 
 
@@ -82,7 +211,7 @@ export default function Explore() {
                 <div className="p-4 bg-[#191C28] rounded-xl   max-w-4xl mx-auto ">
                     <div className="bg-neutral-950 p-4 rounded-xl">
                         <span className="absolute"><Search className="h-5 w-5" /></span>
-                        <input type="search" placeholder="Seach Pokemon by name or #ID..." className="px-6 w-full" />
+                        <input type="search" placeholder="Seach Pokemon by name or #ID..." value={search} onChange={(e) => setSearch(e.target.value)} className="px-6 w-full  outline-none ring-0 hover:ring-0 focus:ring-0 focus:outline-none" />
                     </div>
 
 
@@ -90,6 +219,117 @@ export default function Explore() {
 
                 </div>
             </div>
+
+            {/* banner */}
+
+
+
+
+
+            {/* filter */}
+
+            <div className="px-4 ">
+                <p>
+                    <SlidersHorizontal className="h-5 w-5 text-blue-300 inline-block m-1" />
+                    Filter by Elemental Affinity
+                </p>
+
+                <div className="flex flex-wrap gap-3">
+                    {types.map((type) => (
+                        <button
+                            key={type.name}
+                            onClick={() => setFilter(type.name)}
+                            className={`inline-flex items-center gap-2 cursor-pointer rounded-full px-4 py-2 text-xs text-white transition hover:bg-blue-700 ${filter === type.name ? "bg-blue-600" : "bg-slate-800"
+                                }`}
+                        >
+                            <span
+                                className={`h-2 w-2 rounded-full ${type.color}`}
+                            />
+
+                            <span className="capitalize">{type.name}</span>
+
+
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+
+
+            {/* filter */}
+
+
+            {/* cards */}
+
+            {loading ? (
+                <div className="">
+                    <PokemonLoader />
+
+                </div>
+            ) : (
+                <div>
+                    <div className="grid grid-cols-1 gap-5 p-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        {filterPokemon.map((pokemon) => (
+                            <PokemonCard
+                                key={pokemon.id}
+                                pokemon={pokemon}
+                            />
+                        ))}
+                    </div>
+
+
+                    <div className="my-5 flex justify-center">
+                        <div className="w-fit">
+                            <div className="flex justify-between gap-6 text-xs">
+                                <p>
+                                    Showing {pokemonList.length} of {count} Registered Pokémon
+                                </p>
+
+                                <p className="text-blue-300">
+                                    {count > 0
+                                        ? Math.min(100, Math.round((pokemonList.length / count) * 100))
+                                        : 0}% Complete
+                                </p>
+                            </div>
+
+                            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-800">
+                                <div
+                                    className="h-full rounded-full bg-gradient transition-all duration-300"
+                                    style={{
+                                        width: `${count > 0
+                                            ? Math.min((pokemonList.length / count) * 100, 100)
+                                            : 0
+                                            }%`,
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div className="flex justify-center items-center my-3">
+
+
+                        <button
+                            onClick={handleViewMore}
+                            disabled={loadingMore}
+                            className="rounded-xl bg-gradient px-5 py-3 text-sm  w-auto font-bold text-green-950 transition duration-300 hover:bg-gradient hover:scale-105"
+                        >
+                            {loadingMore ? "Syncing..." : "Fetch Next 24 Pokemon"}
+                            <ChevronDown className="ml-2 inline-block h-4 w-4" />
+                        </button>
+
+                    </div>
+                </div>
+            )}
+            {/* cards */}
+
+
+
+
+
+
+
         </div>
     )
 
