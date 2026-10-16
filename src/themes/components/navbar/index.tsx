@@ -9,6 +9,11 @@ export default function navbar() {
             key: "explore",
             item: "Explore",
             href: "/"
+        },
+        {
+            key:"favroites",
+            item:"favroites",
+            href:""
         }
 
     ]
@@ -23,9 +28,9 @@ export default function navbar() {
                 </span>
             </div>
 
-            <div className="bg-primary text-black p-1 rounded text-xs px-3 cursor-pointer">
+            <div className="flex  gap-3 ">
                 {items.map((item) => {
-                    return <div key={item.key}>{item.key.toUpperCase()}</div>
+                    return <div className="rounded-full bg-primary text-black flex  p-1  text-xs px-3 cursor-pointer" key={item.key}>{item.key.toUpperCase()}</div>
                 })}
             </div>
 

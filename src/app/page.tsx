@@ -1,7 +1,5 @@
-import Explore from "@/themes/pages/explore";
+import Explore from "./explore/page";
 
 export default function Home() {
-  return (
-    <Explore />
-  );
+  return <Explore />;
 }

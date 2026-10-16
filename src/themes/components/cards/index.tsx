@@ -49,7 +49,7 @@ export default function PokemonCard({ pokemon }: PokemonCardProps) {
 
 
 
-    
+
     return (
         <div className="rounded-2xl border border-slate-700 bg-slate-900 p-4 text-white transition duration-300 hover:-translate-y-1 hover:border-purple-500/50">
 
@@ -151,7 +151,7 @@ export default function PokemonCard({ pokemon }: PokemonCardProps) {
                         BST: <span className="font-bold text-green-600">{bst}</span>
                     </div>
                     <div className="text-xs ">
-                        <Link href="" className="font-bold text-blue-300 " > Telemetry
+                        <Link href={`/explore/${pokemon.id}`} className="font-bold text-blue-300 " > Telemetry
 
                             <ArrowRight className="h-4 w-4  inline-block mx-1 text-blue-300" /></Link>
                     </div>
