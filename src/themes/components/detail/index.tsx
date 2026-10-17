@@ -1,6 +1,6 @@
 import { getPokemon, getPokemonSpecies } from "@/lib/pokemon";
 import { pokemonColors } from "@/lib/pokemonColors";
-import { ArrowLeft, Weight } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -11,43 +11,63 @@ export default async function Detail({ id }: { id: string }) {
 
     try {
         [pokemon, species] = await Promise.all([
+
+            // get particular pokemon deatils 
             getPokemon(id),
+
+
+            //  get particular pokemon spicies details
             getPokemonSpecies(id),
         ]);
     } catch {
         notFound();
     }
 
+
+    // getting english description
+
     const englishDescription = species.flavor_text_entries.find(
         (item: { language: { name: string }; flavor_text: string }) =>
             item.language.name === "en"
     );
 
+
+    // getting description
+
+
     const description = englishDescription
         ? englishDescription.flavor_text
         : "No description available.";
 
-    // const englishSummary = species.genera.find(
-    //     (item) => item.language.name === "en"
-    // );
-
-    // const summary = englishSummary
-    //     ? englishSummary.genus
-    //     : "Unknown species";
 
 
+    // converting in meter height
 
-    const height = pokemon.height / 10; // meters
-    const weight = pokemon.weight / 10; // kg
+    const height = pokemon.height / 10;
+
+    // converting in kg 
+    const weight = pokemon.weight / 10;
     const baseExp = pokemon.base_experience ?? "Unknown";
 
+
+    //  getting  catchRate and baseHappiness from api 
     const catchRate = species.capture_rate;
     const baseHappiness = species.base_happiness;
 
 
+    // getting gender rate from api 
+
     const genderRate = species.gender_rate;
+
+
+    // calculate  female geneder rate by   getting gender rate  / total scale  * 100
+
     const femaleRatio =
         genderRate === -1 ? null : (genderRate / 8) * 100;
+
+
+    // calculate  male gender ratio 100 - femaleRatio
+
     const maleRatio =
         genderRate === -1 ? null : 100 - femaleRatio!;
 
@@ -62,13 +82,6 @@ export default async function Detail({ id }: { id: string }) {
                     <Link href="/" className="flex items-center gap-1 hover:text-white">
                         <ArrowLeft size={16} />
                         Explorer
-                    </Link>
-                    <span>/</span>
-                    <Link
-                        href={`/?type=${pokemon.types[0].type.name}`}
-                        className="capitalize hover:text-white"
-                    >
-                        {pokemon.types[0].type.name} types
                     </Link>
                     <span>/</span>
                     <span className="capitalize text-white">
@@ -105,7 +118,6 @@ export default async function Detail({ id }: { id: string }) {
                             )}
                         </div>
 
-                        {/* <p className="mb-2 text-lg font-semibold">{summary}</p> */}
 
                         <p className="max-w-xl leading-7 text-slate-300">
                             {description}
@@ -123,18 +135,20 @@ export default async function Detail({ id }: { id: string }) {
                 </div>
 
 
-                {/* Top Stats Cards */}
+                {/* stats cards */}
                 <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
                     {[
                         {
                             label: "Height",
                             value: `${height} m`,
+                            // converting into feet
                             sub: `${(height * 3.28084).toFixed(2)} ft`,
                             color: "text-white",
                         },
                         {
                             label: "Weight",
                             value: `${weight} kg`,
+                            // converting into lbs
                             sub: `${(weight * 2.20462).toFixed(1)} lbs`,
                             color: "text-white",
                         },
@@ -197,7 +211,7 @@ export default async function Detail({ id }: { id: string }) {
                     </div>
                 </div>
 
-                {/* Main Dashboard */}
+
                 <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
                     {/* Combat Stats */}
                     <div className="rounded-xl border border-white/5 bg-slate-800/80 p-5 lg:col-span-2">
@@ -234,6 +248,7 @@ export default async function Detail({ id }: { id: string }) {
                                             <div
                                                 className={`h-full rounded-full ${statColors[item.stat.name] ?? "bg-blue-400"
                                                     }`}
+                                                // Calculate the progress bar width as a percentage of the maximum reference value (255)
                                                 style={{
                                                     width: `${Math.min(
                                                         (item.base_stat / 255) * 100,

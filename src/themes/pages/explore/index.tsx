@@ -44,13 +44,21 @@ export default function Explore() {
 
 
     const [count, totalCount] = useState(0)
+    //  count fetch  total pokemon fetched
+
     const [pokemonList, setPokemonList] = useState<Pokemon[]>([]);
+    //   Stores the list of Pokémon in an array pokemonList; initially, the array is empty.
+
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState("All");
     const [search, setSearch] = useState("")
     const [pokemonIndex, setPokemonIndex] = useState<
         { id: number; name: string }[]
     >([]);
+
+    // in this it only store  id and name of pokemon for seach 
+
+
     const [offset, setOffset] = useState(0);
     const [loadingMore, setLoadingMore] = useState(false);
 
@@ -90,18 +98,25 @@ export default function Explore() {
                     pokemon.name.includes(searchValue) ||
                     pokemon.id.toString() === searchValue.replace("#", "")
             );
+            // Filter the Pokémon index by name or ID based on the search input.
 
             const newPokemon = await Promise.all(
                 matches.slice(0, 24).map((pokemon) => getPokemon(pokemon.id))
             );
 
+            // Fetch the full details of matching Pokémon
+
             setPokemonList((current) => {
                 const combined = [...current, ...newPokemon];
+
+                //    combined here using spread operator
 
                 return combined.filter(
                     (pokemon, index, self) =>
                         index === self.findIndex((item) => item.id === pokemon.id)
                 );
+
+                // remove duplicate with same name 
             });
         }
 
@@ -125,7 +140,10 @@ export default function Explore() {
                 )
             );
 
+            // getting  each pokemon details
+
             setPokemonList((prev) => [...prev, ...newPokemon]);
+            // storing in array 
             setOffset((prev) => prev + 24);
         } catch (error) {
             console.error(error);
@@ -145,6 +163,7 @@ export default function Explore() {
             pokemon.types.some(
                 (item) => item.type.name === filter.toLowerCase()
             );
+
 
 
 
